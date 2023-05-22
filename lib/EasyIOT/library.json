@@ -1,0 +1,29 @@
+{
+    "name": "EasyIOT",
+    "version": "1.0.0",
+    "description": "A simple implementation of an IOT device for esp8266",
+    "keywords": "esp8266, iot",
+    "repository":
+    {
+      "type": "git",
+      "url": "https://github.com/ursanotsomajor/EasyIOT"
+    },
+    "authors":
+    [
+      {
+        "name": "Eduard Lisin",
+        "email": "eduardlisin@ya.ru",
+        "url": "https://github.com/ursanotsomajor"
+      }
+    ],
+    "license": "MIT",
+    "homepage": "",
+    "dependencies": {
+      "bblanchon/ArduinoJson": "6.18.5",
+      "links2004/WebSockets": "2.3.6",
+      "ESP Async WebServer": "",
+	    "ESP8266WiFi": ""
+    },
+    "frameworks": ["Arduino"],
+    "platforms": ["espressif8266"]
+  }
