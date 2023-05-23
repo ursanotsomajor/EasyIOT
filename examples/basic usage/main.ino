@@ -27,9 +27,9 @@ void setup()
     };
 
     device.modelUpdateReceivedCallback = [](JsonObject &json) {
-        bool updated = model.updateWithJSON(json);
+        bool stateUpdated = model.updateWithJSON(json);
         updateDeviceState();
-        return updated;
+        return stateUpdated;
     };
 
     device.makeJsonRequestCallback = [](JsonObject &json) {
