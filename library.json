@@ -17,12 +17,11 @@
       }
     ],
     "license": "MIT",
-    "homepage": "",
     "dependencies": {
       "bblanchon/ArduinoJson": "6.18.5",
       "links2004/WebSockets": "2.3.6",
       "ESP Async WebServer": "*",
-	    "ESP8266WiFi": "*"
+      "ESP8266WiFi": "*"
     },
     "frameworks": ["Arduino"],
     "platforms": ["espressif8266"]
