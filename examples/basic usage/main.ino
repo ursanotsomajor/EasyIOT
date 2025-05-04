@@ -18,7 +18,7 @@ struct Model
 #define JSON_SIZE 512
 
 Model model = Model();
-EasyIOT device("hotspot_name", "hotspot_pass", JSON_SIZE);
+EasyIOT device("device_type", "hotspot_name", "hotspot_pass", JSON_SIZE);
 
 void setup()
 {

@@ -1,6 +1,6 @@
 {
     "name": "EasyIOT",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "A simple implementation of an IOT device for esp8266",
     "keywords": "esp8266, iot",
     "repository":
