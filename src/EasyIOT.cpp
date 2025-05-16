@@ -20,19 +20,24 @@ void EasyIOT::setup()
     if (!LittleFS.begin()) 
     { 
         log("Failed to mount LittleFS");
-        startAPMode(); 
         return;
     }
 
-    WiFi.persistent(false); 
-    WiFi.setAutoReconnect(true);
-
     loadWiFiConfigFromFS();
     
+    WiFi.persistent(false); 
+    WiFi.setAutoReconnect(true);
     WiFi.mode(WIFI_STA);
+
+    if (_ssid.length() == 0)
+    {
+        startAPMode();
+        return;
+    }
+
     WiFi.begin(_ssid, _password);
 
-    log("Connecting with SSID: " + _ssid + ", password: " + _password);
+    log("Connecting with SSID: " + _ssid);
 
     uint32_t startTime = millis();
 
@@ -41,7 +46,8 @@ void EasyIOT::setup()
         log(".", false);
     }
 
-    if (WiFi.status() != WL_CONNECTED) {
+    if (WiFi.status() != WL_CONNECTED) 
+    {
         startAPMode(); 
         return;
     }
@@ -65,8 +71,8 @@ void EasyIOT::loop()
 {
     if (WiFi.getMode() == WIFI_AP) 
     {
-        dnsServer.processNextRequest();  // Handle captive portal
-        server.handleClient();           // Handle web requests
+        dnsServer.processNextRequest(); 
+        server.handleClient();         
     }
 
     server.handleClient();
@@ -189,17 +195,13 @@ void EasyIOT::sendStateJSON()
 }
 
 // -------------- Storage ------------------
-String ConfigFileName = "/config.json";
+String stateFilePath = "/config.json";
 
 void EasyIOT::loadStateFromFS()
 {
-    if (!LittleFS.exists(ConfigFileName)) 
-    {
-        log("No config file");
-        return;
-    }
+    if (!LittleFS.exists(stateFilePath)) return;
 
-    File configFile = LittleFS.open(ConfigFileName, "r");
+    File configFile = LittleFS.open(stateFilePath, "r");
 
     delay(10);
 
@@ -212,11 +214,11 @@ void EasyIOT::loadStateFromFS()
     if (error)
     {
         log("State model deserialization error: " + String(error.c_str()));
-        LittleFS.remove(ConfigFileName);
+        LittleFS.remove(stateFilePath);
     }
     else
     {
-        log("State model loaded from LittleFS\n" + content);
+        log("State model loaded\n" + content);
         JsonObject json = doc.as<JsonObject>();
         modelUpdateReceivedCallback(json);
     }
@@ -226,17 +228,15 @@ void EasyIOT::loadStateFromFS()
 
 void EasyIOT::saveStateToFS(DynamicJsonDocument doc)
 {
-    File configFile = LittleFS.open(ConfigFileName, "w");
+    File configFile = LittleFS.open(stateFilePath, "w");
 
     if (configFile)
     {
         uint16 size = serializeJson(doc, configFile);
-        log("Saving state to LittleFS. Size = " + String(size));
+        log("Saving state. Size = " + String(size));
     }
     else
-    {
-        log("Couldn't open file named " + ConfigFileName);
-    }
+        log("Couldn't open file named " + stateFilePath);
 
     configFile.close();
 }
@@ -260,12 +260,13 @@ void EasyIOT::saveWiFiConfigToFS(const String &ssid, const String &pass)
 {
     File file = LittleFS.open(wifiConfigPath, "w");
 
-    if (file) {
+    if (file) 
+    {
         DynamicJsonDocument doc(256);
         doc["ssid"] = ssid;
         doc["pass"] = pass;
         serializeJson(doc, file);
-        log("Saved WiFi config to LittleFS");
+        log("Saved WiFi config");
     }
 
     file.close();
@@ -299,11 +300,10 @@ void EasyIOT::startAPMode()
     
     // Redirect all other requests to root
     server.onNotFound([this]() {
-        if (isCaptivePortalRequest(server.hostHeader())) {
+        if (isCaptivePortalRequest(server.hostHeader())) 
             handleRoot();
-        } else {
+        else 
             server.send(404, "text/plain", "File Not Found");
-        }
     });
 
     server.begin();
@@ -341,11 +341,11 @@ void EasyIOT::handleSave()
     if (ssid.length() > 0) 
     {
         saveWiFiConfigToFS(ssid, pass);
-        server.send(200, "text/html", "<p>Saved! Restarting...</p>");
+        server.send(200, "text/html", "<p>Saved. Restarting...</p>");
         delay(1000);
         ESP.restart();
     } 
     else {
-        server.send(400, "text/html", "<p>Error: SSID cannot be empty!</p>");
+        server.send(400, "text/html", "<p>SSID cannot be empty</p>");
     }
 }
