@@ -169,9 +169,18 @@ void EasyIOT::updateStateWithJSONString(String string)
 
     JsonObject root = doc.as<JsonObject>();
     bool updated = modelUpdateReceivedCallback(root);
+    doc.clear();
+
+    delay(10);
 
     if (updated)
     {
+        // Update can be partial and we want to store full model 
+        DynamicJsonDocument doc(_stateDocSize);
+        JsonObject root = doc.to<JsonObject>();
+        makeJsonRequestCallback(root);
+        doc.clear();
+
         saveStateToFS(doc);
         sendStateJSON();
     }
@@ -179,17 +188,19 @@ void EasyIOT::updateStateWithJSONString(String string)
 
 void EasyIOT::sendStateJSON()
 {
-    if (!clientConnected)
-        return;
+    if (!clientConnected) return;
 
     DynamicJsonDocument doc(_stateDocSize);
     JsonObject root = doc.to<JsonObject>();
     root["ip"] = ip();
 
     makeJsonRequestCallback(root);
-
+    
     String state;
-    serializeJsonPretty(doc, state);
+    serializeJson(doc, state);
+
+    size_t jsonSize = measureJson(doc);
+    log("Sending JSON with size: " + String(jsonSize) + ", Free heap: " + String(ESP.getFreeHeap()));
 
     webSocket.broadcastTXT(state);
 }
